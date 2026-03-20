@@ -3,70 +3,141 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pwani University miniJumia</title>
+  <title>Pwanimia - Welcome to Pwanimia</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f8f9fb; margin: 0; padding: 0; color: #1a202c; }
-    .container { max-width: 900px; margin: 0 auto; padding: 24px; }
-    .hero { background: #fff; border: 1px solid #dde4ee; border-radius: 10px; padding: 24px; box-shadow: 0 3px 10px rgba(0,0,0,.05); }
-    h1, h2 { margin-top: 0; }
-    p { line-height: 1.6; }
-    form { background: #fff; border: 1px solid #dde4ee; border-radius: 10px; padding: 18px; margin-top: 20px; }
-    label { display: block; margin-top: 12px; font-weight: 600; }
-    input, textarea { width: 100%; padding: 10px 12px; margin-top: 6px; border: 1px solid #c8d1de; border-radius: 6px; box-sizing: border-box; }
-    button { margin-top: 14px; background: #2b6cb0; border: none; border-radius: 6px; color: #fff; padding: 10px 16px; cursor: pointer; }
-    button:hover { background: #2c5282; }
-    .message { margin-top: 12px; padding: 10px; border-radius: 6px; }
-    .message.success { background: #9ae6b4; color: #22543d; }
-    .message.error { background: #feb2b2; color: #742a2a; }
-    .products { display: grid; gap: 14px; margin-top: 20px; }
-    .product-card { background: #fff; border:1px solid #e2e8f0; border-radius: 8px; padding: 14px; }
-    .product-card h3 { margin: 0 0 8px; }
-    .product-card p { margin: 4px 0; }
-    .product-card img { max-width: 120px; max-height: 120px; object-fit: cover; border-radius: 6px; }
-    .empty { text-align: center; color: #718096; margin-top: 20px; }
-    .actions { margin-top: 16px; }
+    :root {
+      --primary: #e66800;
+      --primary-dark: #c05600;
+      --card-bg: #ffffff;
+      --bg1: #ffc948;
+      --bg2: #ff9418;
+      --text: #1f2937;
+      --muted: #4b5563;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, var(--bg1), var(--bg2)); color: var(--text); }
+    .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+    .site-header { padding: 24px; border-radius: 12px; background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(255,255,255,0.6); box-shadow: 0 8px 30px rgba(0,0,0,.12); }
+    .site-header h1 { margin: 0 0 8px; font-size: 2rem; color: #222; }
+    .site-header p { margin: 0; color: #2d3748; font-size: 1.05rem; }
+
+    .layout { display: grid; gap: 18px; grid-template-columns: 1fr; margin-top: 18px; }
+    .card { background: var(--card-bg); border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08); }
+    .card h2 { margin-top: 0; }
+
+    label { display: block; margin-top: 12px; font-weight: 600; color: #334155; }
+    input, textarea, select { width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; margin-top: 6px; font-size: 0.95rem; }
+    input:focus, textarea:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(230,104,0,0.2); }
+    .wide-inline { display: flex; gap: 12px; flex-wrap: wrap; }
+    .wide-inline > * { flex: 1; min-width: 200px; }
+
+    button { display: inline-flex; align-items: center; justify-content: center; border: none; border-radius: 8px; background: var(--primary); color: #fff; padding: 10px 16px; font-weight: 700; cursor: pointer; margin-top: 14px; }
+    button:hover { background: var(--primary-dark); }
+
+    .message { margin-top: 12px; padding: 10px 12px; border-radius: 6px; }
+    .message.success { background: #d1fae5; color: #065f46; }
+    .message.error { background: #fed7d7; color: #991b1b; }
+
+    .products.empty > .ghost { display: flex; height: 160px; justify-content: center; align-items: center; background: rgba(226,232,240,.3); border-radius: 8px; color: var(--muted); text-align: center; }
+
+    .product-card { border: 1px solid #cbd5e1; border-radius: 12px; padding: 16px; background: #fff; }
+    .product-card h3 { margin: 0; }
+    .product-card .gallery { display: flex; gap: 8px; overflow-x: auto; padding: 8px 0; margin: 12px 0; }
+    .product-card .gallery img { height: 120px; width: 160px; object-fit: cover; border-radius: 8px; }
+    .product-card .meta { margin: 8px 0; color: #4b5563; }
+    .product-card .meta span { display: inline-block; margin-right: 10px; font-size: 0.95rem; }
+    .product-card .owner { background: #f8fafc; border-left: 4px solid var(--primary); padding: 10px; margin-top: 10px; }
+    .product-card .location { font-size: 0.95rem; color: #1d4ed8; }
+
+    .chat-log { min-height: 180px; max-height: 280px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px; margin-top: 10px; background: #f8fafc; }
+    .chat-message { margin-bottom: 10px; }
+    .chat-message strong { color: #0f172a; }
+    .chat-message span { display: block; margin-top: 2px; color: #334155; }
+
+    @media (min-width: 860px) {
+      .layout { grid-template-columns: 2fr 1fr; }
+      .product-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+    }
+
+    @media (max-width: 600px) {
+      .site-header h1 { font-size: 1.6rem; }
+      .product-card .gallery img { width: 120px; height: 90px; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <section class="hero">
-      <h1>Pwani University miniJumia</h1>
-      <p>Welcome! This is a simple marketplace landing page for business students at Pwani University to share and sell real products. On first load, there are no pre-filled products. Your first product entry should come from a real vendor.</p>
-      <p>How it works:</p>
-      <ul>
-        <li>1. Fill in the form below with item details.</li>
-        <li>2. Click "Post Product".</li>
-        <li>3. The product appears in the live listing and is saved locally in your browser.</li>
-      </ul>
-    </section>
+    <header class="site-header">
+      <h1>Welcome to Pwanimia</h1>
+      <p>Buy and sell with Pwanimia (Kilimall/Jumia style) — a marketplace for Pwani University business students. No products pre-populated; entries appear after a real vendor posts.</p>
+    </header>
 
-    <form id="productForm" autocomplete="off">
-      <h2>Post a New Product</h2>
-      <label for="name">Product Name</label>
-      <input id="name" required placeholder="e.g. Handmade Beaded Bag" />
+    <main class="layout">
+      <section class="card" aria-label="Post listing">
+        <h2>Post Product & Seller Info</h2>
 
-      <label for="description">Description</label>
-      <textarea id="description" rows="3" required placeholder="Describe your product"></textarea>
+        <form id="productForm" autocomplete="off">
+          <div class="wide-inline">
+            <div>
+              <label for="sellerName">Seller Full Name</label>
+              <input id="sellerName" required placeholder="e.g. Asha Mwangi" />
+            </div>
+            <div>
+              <label for="sellerContact">Contact (phone/email)</label>
+              <input id="sellerContact" required placeholder="e.g. 0700000000 or email@example.com" />
+            </div>
+          </div>
 
-      <label for="price">Price (in KES)</label>
-      <input id="price" type="number" min="1" required placeholder="e.g. 450" />
+          <label for="sellerCredentials">Seller Credentials</label>
+          <textarea id="sellerCredentials" rows="2" placeholder="e.g. Business student, Class of 2026; registered vendor"></textarea>
 
-      <label for="image">Image URL (optional)</label>
-      <input id="image" type="url" placeholder="https://example.com/image.jpg" />
+          <label for="name">Product Name</label>
+          <input id="name" required placeholder="e.g. Smartwatch, Phone Case" />
 
-      <button type="submit">Post Product</button>
-      <div class="message" id="formMessage" style="display:none"></div>
-    </form>
+          <label for="description">Description</label>
+          <textarea id="description" rows="3" required placeholder="Describe the product in detail"></textarea>
 
-    <section class="actions">
-      <button id="clearStorage">Clear all listings</button>
-    </section>
+          <div class="wide-inline">
+            <div>
+              <label for="price">Price (KES)</label>
+              <input id="price" type="number" min="1" required placeholder="e.g. 1500" />
+            </div>
+            <div>
+              <label for="location">Where to get</label>
+              <input id="location" required placeholder="e.g. Pwani Student Centre, Mombasa" />
+            </div>
+          </div>
 
-    <div id="productsArea">
+          <label for="images">Product Image URLs (comma-separated)</label>
+          <textarea id="images" rows="2" placeholder="https://...jpg, https://...jpg"></textarea>
+
+          <button type="submit">Post on Pwanimia</button>
+          <div class="message" id="formMessage" style="display: none;"></div>
+        </form>
+
+        <div class="actions">
+          <button id="clearStorage" type="button">Clear all listings</button>
+        </div>
+      </section>
+
+      <aside class="card" aria-label="Chat interface">
+        <h2>Owner-Customer Chat</h2>
+        <div class="chat-log" id="chatLog"><div class="chat-entry" style="color:#64748b;">No messages yet. Say hello to the seller once products are posted.</div></div>
+        <div style="margin-top:10px; display:flex; gap:8px; align-items:center;">
+          <input id="chatInput" placeholder="Type your message..." style="flex:1;" />
+          <button id="chatSend" type="button">Send</button>
+        </div>
+      </aside>
+    </main>
+
+    <section class="card" aria-label="Product listings">
       <h2>Product Listings</h2>
-      <div class="products" id="productList"></div>
-      <div class="empty" id="emptyState">No products yet. Post the first product!</div>
-    </div>
+      <div id="productList" class="product-grid"></div>
+      <div class="products empty" id="emptyState">
+        <div class="ghost">No products yet. The space is ready; a seller needs to post first.</div>
+      </div>
+    </section>
   </div>
 
   <script>
@@ -75,13 +146,17 @@
     const emptyState = document.getElementById('emptyState');
     const message = document.getElementById('formMessage');
     const clearStorageBtn = document.getElementById('clearStorage');
-    const storageKey = 'pwani-miniJumia-products';
+    const chatLog = document.getElementById('chatLog');
+    const chatInput = document.getElementById('chatInput');
+    const chatSend = document.getElementById('chatSend');
+    const storageKey = 'pwanimia-products';
+    const chatKey = 'pwanimia-chat';
 
     function setMessage(text, type = 'success') {
       message.textContent = text;
       message.className = `message ${type}`;
       message.style.display = 'block';
-      setTimeout(() => { message.style.display = 'none'; }, 4000);
+      setTimeout(() => { message.style.display = 'none'; }, 3500);
     }
 
     function getSavedProducts() {
@@ -94,8 +169,22 @@
       localStorage.setItem(storageKey, JSON.stringify(list));
     }
 
+    function getSavedChat() {
+      const raw = localStorage.getItem(chatKey);
+      if (!raw) return [];
+      try { return JSON.parse(raw) || []; } catch (error) { return []; }
+    }
+
+    function saveChat(chat) {
+      localStorage.setItem(chatKey, JSON.stringify(chat));
+    }
+
     function formatCurrency(amount) {
       return new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES' }).format(amount);
+    }
+
+    function cleanImageUrls(rawText) {
+      return rawText.split(',').map(u => u.trim()).filter(Boolean);
     }
 
     function renderProducts() {
@@ -110,17 +199,24 @@
       products.forEach((product, idx) => {
         const card = document.createElement('article');
         card.className = 'product-card';
+
+        const imagesHtml = product.images.length
+          ? `<div class="gallery">${product.images.map(url => `<img src="${url}" alt="${product.name}" loading="lazy" onerror="this.style.display='none'"></img>`).join('')}</div>`
+          : '<div class="gallery"><div style="padding:28px; color:#94a3b8;">No images added yet.</div></div>';
+
         card.innerHTML = `
-          <div style="display:flex; gap:12px; align-items:flex-start;">
-            ${product.image ? `<img src="${product.image}" alt="${product.name}" loading="lazy">` : '' }
-            <div style="flex:1;">
-              <h3>${product.name}</h3>
-              <p>${product.description}</p>
-              <p><strong>Price:</strong> ${formatCurrency(product.price)}</p>
-            </div>
+          <h3>${product.name}</h3>
+          ${imagesHtml}
+          <p class="meta"><span><strong>Price:</strong> ${formatCurrency(product.price)}</span><span><strong>Location:</strong> ${product.location}</span></p>
+          <p>${product.description}</p>
+          <div class="owner">
+            <strong>Seller:</strong> ${product.sellerName}<br>
+            <strong>Contact:</strong> ${product.sellerContact}<br>
+            <strong>Credentials:</strong> ${product.sellerCredentials || '<em>No credentials provided</em>'}
           </div>
-          <button type="button" data-index="${idx}" style="margin-top: 10px; padding: 6px 10px; border: none; border-radius: 5px; background: #e53e3e; color:#fff; cursor:pointer;">Remove</button>
+          <button type="button" data-index="${idx}" style="margin-top: 10px; padding: 8px 12px; border-radius: 8px; background: #dc2626; color:#fff; border:none; cursor:pointer;">Remove</button>
         `;
+
         const removeBtn = card.querySelector('button');
         removeBtn.addEventListener('click', () => {
           const updated = getSavedProducts().filter((_, i) => i !== idx);
@@ -128,42 +224,81 @@
           renderProducts();
           setMessage('Product removed', 'success');
         });
+
         productList.appendChild(card);
       });
     }
 
+    function renderChat() {
+      const messages = getSavedChat();
+      chatLog.innerHTML = '';
+      if (!messages.length) {
+        chatLog.innerHTML = '<div class="chat-entry" style="color:#64748b;">No messages yet. Send first message.</div>';
+        return;
+      }
+
+      messages.forEach((msg) => {
+        const item = document.createElement('div');
+        item.className = 'chat-message';
+        item.innerHTML = `<strong>${msg.user}:</strong><span>${msg.text}</span><small style="color:#94a3b8; font-size:0.8rem;">${new Date(msg.time).toLocaleString()}</small>`;
+        chatLog.appendChild(item);
+      });
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
     productForm.addEventListener('submit', event => {
       event.preventDefault();
-
+      const sellerName = document.getElementById('sellerName').value.trim();
+      const sellerContact = document.getElementById('sellerContact').value.trim();
+      const sellerCredentials = document.getElementById('sellerCredentials').value.trim();
       const name = document.getElementById('name').value.trim();
       const description = document.getElementById('description').value.trim();
       const price = Number(document.getElementById('price').value);
-      const image = document.getElementById('image').value.trim();
+      const location = document.getElementById('location').value.trim();
+      const images = cleanImageUrls(document.getElementById('images').value);
 
-      if (!name || !description || !price || price <= 0) {
+      if (!sellerName || !sellerContact || !name || !description || !price || price <= 0 || !location) {
         setMessage('Please fill all required fields correctly.', 'error');
         return;
       }
 
       const currentProducts = getSavedProducts();
-      const newProduct = { name, description, price, image };
+      const newProduct = { sellerName, sellerContact, sellerCredentials, name, description, price, location, images };
       currentProducts.unshift(newProduct);
       saveProducts(currentProducts);
 
       productForm.reset();
       renderProducts();
-      setMessage('Your product has been added!');
+      setMessage('Your listing is now live on Pwanimia!', 'success');
     });
 
     clearStorageBtn.addEventListener('click', () => {
-      if (confirm('Clear all products from this browser?')) {
+      if (confirm('Clear all product listings from this browser?')) {
         localStorage.removeItem(storageKey);
         renderProducts();
         setMessage('All products cleared.', 'success');
       }
     });
 
+    chatSend.addEventListener('click', () => {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      const messages = getSavedChat();
+      messages.push({ user: 'Buyer', text, time: Date.now() });
+      saveChat(messages);
+      chatInput.value = '';
+      renderChat();
+    });
+
+    chatInput.addEventListener('keypress', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        chatSend.click();
+      }
+    });
+
     renderProducts();
+    renderChat();
   </script>
 </body>
 </html>
