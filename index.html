@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pwani University miniJumia</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f8f9fb; margin: 0; padding: 0; color: #1a202c; }
+    .container { max-width: 900px; margin: 0 auto; padding: 24px; }
+    .hero { background: #fff; border: 1px solid #dde4ee; border-radius: 10px; padding: 24px; box-shadow: 0 3px 10px rgba(0,0,0,.05); }
+    h1, h2 { margin-top: 0; }
+    p { line-height: 1.6; }
+    form { background: #fff; border: 1px solid #dde4ee; border-radius: 10px; padding: 18px; margin-top: 20px; }
+    label { display: block; margin-top: 12px; font-weight: 600; }
+    input, textarea { width: 100%; padding: 10px 12px; margin-top: 6px; border: 1px solid #c8d1de; border-radius: 6px; box-sizing: border-box; }
+    button { margin-top: 14px; background: #2b6cb0; border: none; border-radius: 6px; color: #fff; padding: 10px 16px; cursor: pointer; }
+    button:hover { background: #2c5282; }
+    .message { margin-top: 12px; padding: 10px; border-radius: 6px; }
+    .message.success { background: #9ae6b4; color: #22543d; }
+    .message.error { background: #feb2b2; color: #742a2a; }
+    .products { display: grid; gap: 14px; margin-top: 20px; }
+    .product-card { background: #fff; border:1px solid #e2e8f0; border-radius: 8px; padding: 14px; }
+    .product-card h3 { margin: 0 0 8px; }
+    .product-card p { margin: 4px 0; }
+    .product-card img { max-width: 120px; max-height: 120px; object-fit: cover; border-radius: 6px; }
+    .empty { text-align: center; color: #718096; margin-top: 20px; }
+    .actions { margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <h1>Pwani University miniJumia</h1>
+      <p>Welcome! This is a simple marketplace landing page for business students at Pwani University to share and sell real products. On first load, there are no pre-filled products. Your first product entry should come from a real vendor.</p>
+      <p>How it works:</p>
+      <ul>
+        <li>1. Fill in the form below with item details.</li>
+        <li>2. Click "Post Product".</li>
+        <li>3. The product appears in the live listing and is saved locally in your browser.</li>
+      </ul>
+    </section>
+
+    <form id="productForm" autocomplete="off">
+      <h2>Post a New Product</h2>
+      <label for="name">Product Name</label>
+      <input id="name" required placeholder="e.g. Handmade Beaded Bag" />
+
+      <label for="description">Description</label>
+      <textarea id="description" rows="3" required placeholder="Describe your product"></textarea>
+
+      <label for="price">Price (in KES)</label>
+      <input id="price" type="number" min="1" required placeholder="e.g. 450" />
+
+      <label for="image">Image URL (optional)</label>
+      <input id="image" type="url" placeholder="https://example.com/image.jpg" />
+
+      <button type="submit">Post Product</button>
+      <div class="message" id="formMessage" style="display:none"></div>
+    </form>
+
+    <section class="actions">
+      <button id="clearStorage">Clear all listings</button>
+    </section>
+
+    <div id="productsArea">
+      <h2>Product Listings</h2>
+      <div class="products" id="productList"></div>
+      <div class="empty" id="emptyState">No products yet. Post the first product!</div>
+    </div>
+  </div>
+
+  <script>
+    const productForm = document.getElementById('productForm');
+    const productList = document.getElementById('productList');
+    const emptyState = document.getElementById('emptyState');
+    const message = document.getElementById('formMessage');
+    const clearStorageBtn = document.getElementById('clearStorage');
+    const storageKey = 'pwani-miniJumia-products';
+
+    function setMessage(text, type = 'success') {
+      message.textContent = text;
+      message.className = `message ${type}`;
+      message.style.display = 'block';
+      setTimeout(() => { message.style.display = 'none'; }, 4000);
+    }
+
+    function getSavedProducts() {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return [];
+      try { return JSON.parse(raw) || []; } catch (error) { return []; }
+    }
+
+    function saveProducts(list) {
+      localStorage.setItem(storageKey, JSON.stringify(list));
+    }
+
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES' }).format(amount);
+    }
+
+    function renderProducts() {
+      const products = getSavedProducts();
+      productList.innerHTML = '';
+      if (!products.length) {
+        emptyState.style.display = 'block';
+        return;
+      }
+      emptyState.style.display = 'none';
+
+      products.forEach((product, idx) => {
+        const card = document.createElement('article');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <div style="display:flex; gap:12px; align-items:flex-start;">
+            ${product.image ? `<img src="${product.image}" alt="${product.name}" loading="lazy">` : '' }
+            <div style="flex:1;">
+              <h3>${product.name}</h3>
+              <p>${product.description}</p>
+              <p><strong>Price:</strong> ${formatCurrency(product.price)}</p>
+            </div>
+          </div>
+          <button type="button" data-index="${idx}" style="margin-top: 10px; padding: 6px 10px; border: none; border-radius: 5px; background: #e53e3e; color:#fff; cursor:pointer;">Remove</button>
+        `;
+        const removeBtn = card.querySelector('button');
+        removeBtn.addEventListener('click', () => {
+          const updated = getSavedProducts().filter((_, i) => i !== idx);
+          saveProducts(updated);
+          renderProducts();
+          setMessage('Product removed', 'success');
+        });
+        productList.appendChild(card);
+      });
+    }
+
+    productForm.addEventListener('submit', event => {
+      event.preventDefault();
+
+      const name = document.getElementById('name').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const price = Number(document.getElementById('price').value);
+      const image = document.getElementById('image').value.trim();
+
+      if (!name || !description || !price || price <= 0) {
+        setMessage('Please fill all required fields correctly.', 'error');
+        return;
+      }
+
+      const currentProducts = getSavedProducts();
+      const newProduct = { name, description, price, image };
+      currentProducts.unshift(newProduct);
+      saveProducts(currentProducts);
+
+      productForm.reset();
+      renderProducts();
+      setMessage('Your product has been added!');
+    });
+
+    clearStorageBtn.addEventListener('click', () => {
+      if (confirm('Clear all products from this browser?')) {
+        localStorage.removeItem(storageKey);
+        renderProducts();
+        setMessage('All products cleared.', 'success');
+      }
+    });
+
+    renderProducts();
+  </script>
+</body>
+</html>
