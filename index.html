@@ -81,7 +81,7 @@
           <div class="wide-inline">
             <div>
               <label for="sellerName">Seller Full Name</label>
-              <input id="sellerName" required placeholder="e.g. Asha Mwangi" />
+              <input id="sellerName" required placeholder="e.g. Jaffery Finlays" />
             </div>
             <div>
               <label for="sellerContact">Contact (phone/email)</label>
@@ -109,8 +109,8 @@
             </div>
           </div>
 
-          <label for="images">Product Image URLs (comma-separated)</label>
-          <textarea id="images" rows="2" placeholder="https://...jpg, https://...jpg"></textarea>
+          <label for="images">Product Images (select from gallery or camera)</label>
+          <input id="images" type="file" accept="image/*" multiple capture />
 
           <button type="submit">Post on Pwanimia</button>
           <div class="message" id="formMessage" style="display: none;"></div>
@@ -119,16 +119,6 @@
         <div class="actions">
           <button id="clearStorage" type="button">Clear all listings</button>
         </div>
-      </section>
-
-      <aside class="card" aria-label="Chat interface">
-        <h2>Owner-Customer Chat</h2>
-        <div class="chat-log" id="chatLog"><div class="chat-entry" style="color:#64748b;">No messages yet. Say hello to the seller once products are posted.</div></div>
-        <div style="margin-top:10px; display:flex; gap:8px; align-items:center;">
-          <input id="chatInput" placeholder="Type your message..." style="flex:1;" />
-          <button id="chatSend" type="button">Send</button>
-        </div>
-      </aside>
     </main>
 
     <section class="card" aria-label="Product listings">
@@ -146,11 +136,7 @@
     const emptyState = document.getElementById('emptyState');
     const message = document.getElementById('formMessage');
     const clearStorageBtn = document.getElementById('clearStorage');
-    const chatLog = document.getElementById('chatLog');
-    const chatInput = document.getElementById('chatInput');
-    const chatSend = document.getElementById('chatSend');
     const storageKey = 'pwanimia-products';
-    const chatKey = 'pwanimia-chat';
 
     function setMessage(text, type = 'success') {
       message.textContent = text;
@@ -159,36 +145,36 @@
       setTimeout(() => { message.style.display = 'none'; }, 3500);
     }
 
-    function getSavedProducts() {
-      const raw = localStorage.getItem(storageKey);
-      if (!raw) return [];
-      try { return JSON.parse(raw) || []; } catch (error) { return []; }
+    async function getSavedProducts() {
+      try {
+        const response = await fetch('/api/products');
+        return await response.json();
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        return [];
+      }
     }
 
-    function saveProducts(list) {
-      localStorage.setItem(storageKey, JSON.stringify(list));
-    }
-
-    function getSavedChat() {
-      const raw = localStorage.getItem(chatKey);
-      if (!raw) return [];
-      try { return JSON.parse(raw) || []; } catch (error) { return []; }
-    }
-
-    function saveChat(chat) {
-      localStorage.setItem(chatKey, JSON.stringify(chat));
+    async function saveProducts(list) {
+      // Not needed for server, but keep for compatibility
     }
 
     function formatCurrency(amount) {
       return new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES' }).format(amount);
     }
 
-    function cleanImageUrls(rawText) {
-      return rawText.split(',').map(u => u.trim()).filter(Boolean);
+    function processImages(files) {
+      return Promise.all(Array.from(files).map(file => {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.readAsDataURL(file);
+        });
+      }));
     }
 
-    function renderProducts() {
-      const products = getSavedProducts();
+    async function renderProducts() {
+      const products = await getSavedProducts();
       productList.innerHTML = '';
       if (!products.length) {
         emptyState.style.display = 'block';
@@ -218,35 +204,21 @@
         `;
 
         const removeBtn = card.querySelector('button');
-        removeBtn.addEventListener('click', () => {
-          const updated = getSavedProducts().filter((_, i) => i !== idx);
-          saveProducts(updated);
-          renderProducts();
-          setMessage('Product removed', 'success');
+        removeBtn.addEventListener('click', async () => {
+          try {
+            await fetch(`/api/products/${idx}`, { method: 'DELETE' });
+            await renderProducts();
+            setMessage('Product removed', 'success');
+          } catch (error) {
+            setMessage('Error removing product', 'error');
+          }
         });
 
         productList.appendChild(card);
       });
     }
 
-    function renderChat() {
-      const messages = getSavedChat();
-      chatLog.innerHTML = '';
-      if (!messages.length) {
-        chatLog.innerHTML = '<div class="chat-entry" style="color:#64748b;">No messages yet. Send first message.</div>';
-        return;
-      }
-
-      messages.forEach((msg) => {
-        const item = document.createElement('div');
-        item.className = 'chat-message';
-        item.innerHTML = `<strong>${msg.user}:</strong><span>${msg.text}</span><small style="color:#94a3b8; font-size:0.8rem;">${new Date(msg.time).toLocaleString()}</small>`;
-        chatLog.appendChild(item);
-      });
-      chatLog.scrollTop = chatLog.scrollHeight;
-    }
-
-    productForm.addEventListener('submit', event => {
+    productForm.addEventListener('submit', async event => {
       event.preventDefault();
       const sellerName = document.getElementById('sellerName').value.trim();
       const sellerContact = document.getElementById('sellerContact').value.trim();
@@ -255,49 +227,50 @@
       const description = document.getElementById('description').value.trim();
       const price = Number(document.getElementById('price').value);
       const location = document.getElementById('location').value.trim();
-      const images = cleanImageUrls(document.getElementById('images').value);
+      const imageFiles = document.getElementById('images').files;
 
       if (!sellerName || !sellerContact || !name || !description || !price || price <= 0 || !location) {
         setMessage('Please fill all required fields correctly.', 'error');
         return;
       }
 
-      const currentProducts = getSavedProducts();
+      const images = await processImages(imageFiles);
+
       const newProduct = { sellerName, sellerContact, sellerCredentials, name, description, price, location, images };
-      currentProducts.unshift(newProduct);
-      saveProducts(currentProducts);
 
-      productForm.reset();
-      renderProducts();
-      setMessage('Your listing is now live on Pwanimia!', 'success');
-    });
-
-    clearStorageBtn.addEventListener('click', () => {
-      if (confirm('Clear all product listings from this browser?')) {
-        localStorage.removeItem(storageKey);
-        renderProducts();
-        setMessage('All products cleared.', 'success');
+      try {
+        const response = await fetch('/api/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newProduct)
+        });
+        if (response.ok) {
+          productForm.reset();
+          await renderProducts();
+          setMessage('Your listing is now live on Pwanimia!', 'success');
+        } else {
+          setMessage('Error posting product', 'error');
+        }
+      } catch (error) {
+        setMessage('Error posting product', 'error');
       }
     });
 
-    chatSend.addEventListener('click', () => {
-      const text = chatInput.value.trim();
-      if (!text) return;
-      const messages = getSavedChat();
-      messages.push({ user: 'Buyer', text, time: Date.now() });
-      saveChat(messages);
-      chatInput.value = '';
-      renderChat();
-    });
-
-    chatInput.addEventListener('keypress', event => {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        chatSend.click();
+    clearStorageBtn.addEventListener('click', async () => {
+      if (confirm('Clear all product listings?')) {
+        try {
+          await fetch('/api/products', { method: 'DELETE' });
+          await renderProducts();
+          setMessage('All products cleared.', 'success');
+        } catch (error) {
+          setMessage('Error clearing products', 'error');
+        }
       }
     });
 
-    renderProducts();
+    (async () => {
+      await renderProducts();
+    })();
     renderChat();
   </script>
 </body>
